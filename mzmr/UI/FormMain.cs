@@ -348,6 +348,11 @@ namespace mzmr.UI
             
         }
 
+        private void button_batchRand_Click(object sender, EventArgs e)
+        {
+
+        }
+
         private void Button_settings_Click(object sender, EventArgs e)
         {
             var form = new FormSettings();
@@ -881,6 +886,5 @@ namespace mzmr.UI
         }
 
         #endregion
-
     }
 }
