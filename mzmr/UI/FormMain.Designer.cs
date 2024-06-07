@@ -951,14 +951,14 @@
             // 
             // numericUpDown_batchAmount
             // 
-            this.numericUpDown_batchAmount.Location = new System.Drawing.Point(200, 44);
+            this.numericUpDown_batchAmount.Location = new System.Drawing.Point(189, 44);
             this.numericUpDown_batchAmount.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
             this.numericUpDown_batchAmount.Name = "numericUpDown_batchAmount";
-            this.numericUpDown_batchAmount.Size = new System.Drawing.Size(41, 20);
+            this.numericUpDown_batchAmount.Size = new System.Drawing.Size(52, 20);
             this.numericUpDown_batchAmount.TabIndex = 4;
             this.numericUpDown_batchAmount.Value = new decimal(new int[] {
             10,

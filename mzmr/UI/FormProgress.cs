@@ -23,17 +23,21 @@ namespace mzmr.UI
 
         private RandomAll randomAll;
         private bool finished = false;
+        private bool waitForInput;
 
         private CancellationTokenSource cancelSource;
 
         public RandomizationResult Result { get; private set; }
         private LogLayer detailedLog = null;
 
-        public FormProgress(RandomAll randAll)
+        public FormProgress(RandomAll randAll, bool wait = true, string progress = "")
         {
             InitializeComponent();
 
             randomAll = randAll;
+            waitForInput = wait;
+            labelProgressInfo.Text += progress;
+
             cancelSource = new CancellationTokenSource();
             Task.Run(() => Worker(cancelSource.Token));
             Size = defaultSize;
@@ -73,7 +77,12 @@ namespace mzmr.UI
 
             finished = true;
             if (Result == RandomizationResult.Successful)
-                labelProgressInfo.Text = "Randomization Complete";
+            {
+                if(waitForInput)
+                    labelProgressInfo.Text = "Randomization Complete";
+                else
+                    Close();
+            }
             else if (Result == RandomizationResult.Failed)
                 labelProgressInfo.Text = "Randomization Failed";
             else if (Result == RandomizationResult.Aborted)

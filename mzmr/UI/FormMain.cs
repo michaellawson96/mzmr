@@ -155,6 +155,9 @@ namespace mzmr.UI
         private void ToggleControls(bool toggle)
         {
             button_randomize.Enabled = toggle;
+            button_batchRand.Enabled = toggle;
+            label_batchAmount.Enabled = toggle;
+            numericUpDown_batchAmount.Enabled = toggle;
             label_seed.Enabled = toggle;
             textBox_seed.Enabled = toggle;
             button_settings.Enabled = toggle;
@@ -350,6 +353,26 @@ namespace mzmr.UI
 
         private void button_batchRand_Click(object sender, EventArgs e)
         {
+            while (true)
+            {
+                using (FolderBrowserDialog selectFolder = new FolderBrowserDialog())
+                {
+                    selectFolder.Description = "Select a directory to save the randomized ROM files to";
+                    if (selectFolder.ShowDialog() != DialogResult.OK)
+                        return;
+
+                    long timestampOfBatch = DateTime.UtcNow.Ticks;
+                    for (var i = 1; i <= numericUpDown_batchAmount.Value; i++)
+                    {
+                        if (!Randomize($"{selectFolder.SelectedPath}\\MZMR_Batch{timestampOfBatch}ROM{i}.gba", true, $" {i}/{numericUpDown_batchAmount.Value}"))
+                            break;
+                    }
+
+                    MessageBox.Show("Batch process is complete");
+
+                    break;
+                }
+            }
 
         }
 
@@ -405,13 +428,13 @@ namespace mzmr.UI
             ToggleControls(true);
         }
 
-        private void Randomize(string filename)
+        private bool Randomize(string filename, bool isBatch = false, string progress = "")
         {
             if (!ValidateCustomAssignments())
-                return;
+                return false;
 
             // get seed
-            if (!int.TryParse(textBox_seed.Text, out int seed))
+            if (isBatch || !int.TryParse(textBox_seed.Text, out int seed))
             {
                 Random temp = new Random();
                 seed = temp.Next();
@@ -421,7 +444,7 @@ namespace mzmr.UI
             Settings settings = GetSettingsFromState();
 
             if (!ValidateLogicLoaded(settings))
-                return;
+                return false;
 
             string config = settings.GetString();
             Properties.Settings.Default.prevSettings = config;
@@ -429,19 +452,19 @@ namespace mzmr.UI
 
             // randomize
             var randAll = new RandomAll(rom, settings, seed);
-            var randomForm = new FormProgress(randAll);
+            var randomForm = new FormProgress(randAll, !isBatch, progress);
             randomForm.StartPosition = FormStartPosition.CenterParent;
             randomForm.ShowDialog();
 
             if (randomForm.Result == RandomizationResult.Aborted)
             {
                 Reset();
-                return;
+                return false;
             }
             if (randomForm.Result == RandomizationResult.Failed)
             {
                 MessageBox.Show("Randomization failed.\n\nTry changing your settings.");
-                return;
+                return false;
             }
 
             // save ROM
@@ -473,12 +496,16 @@ namespace mzmr.UI
             }
 
             // display seed and settings
-            FormComplete form = new FormComplete(seed, config, logPath, mapsPath);
-            form.ShowDialog();
-            form.Dispose();
+            if (!isBatch)
+            {
+                FormComplete form = new FormComplete(seed, config, logPath, mapsPath);
+                form.ShowDialog();
+                form.Dispose();
+            }
 
             // clean up
             Reset();
+            return true;
         }
 
         #endregion
